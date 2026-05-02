@@ -1,0 +1,4 @@
+COMPANY CANCELLATION POLICY:
+1. Orders with the status "Processing" can be cancelled immediately with a full refund.
+2. Orders with the status "Packed" cannot be cancelled as they are already on the loading dock.
+3. Orders with the status "Shipped" cannot be cancelled. The customer must wait for delivery and initiate a return.
