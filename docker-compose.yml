@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # 1. The Vector Database
+  pgvector-db:
+    image: pgvector/pgvector:pg16
+    container_name: enterprise-vector-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password  # Update these to match your application.properties!
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - ai-network
+
+  # 2. The Spring Boot AI Agent
+  backend:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: enterprise-ai-backend
+    ports:
+      - "8080:8080"
+    environment:
+      # Spring Boot automatically overrides application.properties with these!
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://pgvector-db:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - OPENAI_API_KEY=${OPENAI_API_KEY} 
+    depends_on:
+      - pgvector-db
+    networks:
+      - ai-network
+
+  # 3. The React Vite UI
+  frontend:
+    build:
+      context: ./enterprise-ai-ui
+      dockerfile: Dockerfile
+    container_name: enterprise-ai-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - ai-network
+
+# Secure internal network
+networks:
+  ai-network:
+    driver: bridge
+
+# Persistent hard drive for the database
+volumes:
+  pgdata:
